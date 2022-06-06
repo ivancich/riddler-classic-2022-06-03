@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -6,8 +5,10 @@
 
 #include <boost/rational.hpp>
 
+
 using Num = unsigned long long;
 using Rat = boost::rational<Num>;
+
 
 Num factorial(Num n) {
     if (n <= 1) return 1;
@@ -18,14 +19,7 @@ Num factorial(Num n) {
     return product;
 }
 
-#if 0
-Rat factorial(Rat n) {
-    assert(n.denominator() == 1);
-    Num f = factorial(n.numerator());
-    return Rat(f);
-}
-#endif
-
+// combinatorial calculation of choosing "count" items from "from" items.
 Num choose(int from, int count) {
     return factorial(from) / factorial(count) / factorial(from - count);
 }
@@ -52,8 +46,11 @@ Rat simulate(int n, int iterations) {
     int bad = 0;
 
     while (iterations-- > 0) {
+        // track the travlers who go "left" and "right" separately
         int left = 0;
         int right = 0;
+
+        // divide the travelers randomly into "left" and "right" groups
         for (int i = 0; i < n; ++i) {
             if (rand() % 2) {
                 left++;
@@ -64,6 +61,7 @@ Rat simulate(int n, int iterations) {
 
         bool is_good = true;
 
+        // see if the "left" travelers don't have crossing paths
         int current = 0;
         while (left-- > 0) {
             int r = rand();
@@ -74,6 +72,8 @@ Rat simulate(int n, int iterations) {
                 break;
             }
         }
+
+        // if we're good at this point, check the "right" travelers
         if (is_good) {
             int current = 0;
             while (right-- > 0) {
@@ -96,22 +96,29 @@ Rat simulate(int n, int iterations) {
 
 int main(int argc, char* argv[]) {
     srand (time(NULL));
+
+    // parse command-line
     
     int n = 4;
     if (argc >= 2) {
         n = atoi(argv[1]);
     }
-    bool show_intermediate = argc >= 4;
 
     int iterations = 1000000;
     if (argc >= 3) {
         iterations = atoi(argv[2]);
     }
 
-    Rat result = calc(n, show_intermediate);
+    const bool show_intermediate = argc >= 4;
 
-    double d = boost::rational_cast<double>(result);
-    std::cout << n << ": " << result << " (" << d << ")" << std::endl;
+    // calculate odds
+
+    const Rat result1 = calc(n, show_intermediate);
+
+    const double d1 = boost::rational_cast<double>(result1);
+    std::cout << n << ": " << result1 << " (" << d1 << ")" << std::endl;
+
+    // simulate odds
 
     Rat result2 = simulate(n, iterations);
 
